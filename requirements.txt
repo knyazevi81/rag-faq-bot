@@ -1,0 +1,14 @@
+fastapi
+langchain
+langchain-community
+langchain-core
+langchain-ollama
+ollama
+pydantic
+pydantic-settings
+PyPDF2
+python-multipart
+qdrant-client
+SQLAlchemy
+uvicorn
+pypdf 
