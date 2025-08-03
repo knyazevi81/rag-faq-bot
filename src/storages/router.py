@@ -62,13 +62,15 @@ async def upload_document(file: UploadFile = File(...)):
 
         documents = loader.load()
         
-        splitter = RecursiveCharacterTextSplitter(
-            chunk_size=768,         # если хочешь чуть больше контекста
-            chunk_overlap=150,      # важен overlap — чтобы не обрывать смысл
-            separators=["\n\n", "\n", ".", "!", "?", ",", " "]
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=1000,  # Увеличиваем для сохранения контекста
+            chunk_overlap=200,
+            separators=["\n\n", "\n", "\. ", "! ", "? ", " ", ""],
+            length_function=len,
+            is_separator_regex=False,
         )
 
-        chunks = splitter.split_documents(documents)
+        chunks = text_splitter.split_documents(documents)
 
         for chunk in chunks:
             chunk.metadata.update({

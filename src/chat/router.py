@@ -3,9 +3,14 @@ from langchain_community.llms import Ollama
 from langchain.chains import RetrievalQA
 from langchain.vectorstores import Qdrant
 from langchain.prompts import PromptTemplate
+from pydantic import BaseModel
+from fastapi import HTTPException
+
 from src.storage import qd_client
 from src.embedding import embedding_model
 from src.config import settings
+from src.chain import get_qa_chain
+
 
 router = APIRouter(prefix="/chat")
 
@@ -16,36 +21,34 @@ llm = Ollama(
     temperature=0.3
 )
 
-# Кастомный промпт
-prompt_template = PromptTemplate.from_template("""
-Ты — литературный ассистент. Ответь на вопрос, используя только контекст из романа "Мастер и Маргарита".
+# torch.set_num_threads(4)
 
-Контекст:
-{context}
+class QuestionRequest(BaseModel):
+    question: str
 
-Вопрос: {question}
-
-Если ответа в контексте нет — скажи честно, что информации недостаточно.
-""")
-
-@router.get("/ask")
-async def ask(query: str = Query(...)):
-    vectorstore = Qdrant(
-        client=qd_client,
-        collection_name=settings.QDRANT_COLLECTION_NAME,
-        embeddings=embedding_model
-    )
-
-    retriever = vectorstore.as_retriever(search_kwargs={"k": 15})
-    qa_chain = RetrievalQA.from_chain_type(
-        llm=llm,
-        retriever=retriever,
-        chain_type="stuff",
-        chain_type_kwargs={"prompt": prompt_template}
-    )
-
-    response = qa_chain.run(query)
-    return {"answer": response}
+@router.post("/ask")
+async def ask_question(request: QuestionRequest):
+    try:
+        qa_chain = get_qa_chain()
+        result = qa_chain({"query": request.question})
+        
+        # Формирование ответа с источниками
+        answer = result["result"]
+        sources = []
+        for doc in result.get("source_documents", []):
+            source_info = {
+                "source": doc.metadata.get("source_file", "unknown"),
+                "page": doc.metadata.get("page", "N/A"),
+                "entities": doc.metadata.get("key_entities", [])
+            }
+            sources.append(source_info)
+        
+        return {
+            "answer": answer,
+            "sources": sources
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/debug")
