@@ -61,7 +61,13 @@ async def upload_document(file: UploadFile = File(...)):
             loader = TextLoader(str(tmp_path))
 
         documents = loader.load()
-        splitter = RecursiveCharacterTextSplitter(chunk_size=512, chunk_overlap=50)
+        
+        splitter = RecursiveCharacterTextSplitter(
+            chunk_size=768,         # если хочешь чуть больше контекста
+            chunk_overlap=150,      # важен overlap — чтобы не обрывать смысл
+            separators=["\n\n", "\n", ".", "!", "?", ",", " "]
+        )
+
         chunks = splitter.split_documents(documents)
 
         for chunk in chunks:
