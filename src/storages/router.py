@@ -90,7 +90,7 @@ async def upload_document(file: UploadFile = File(...)):
             embeddings=embedding_model
         )
             
-        vectorstore.add_documents(chunks)
+        vectorstore.add_documents(documents)
 
         # chunks = text_splitter.split_documents(documents)
 # 
