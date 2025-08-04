@@ -1,16 +1,21 @@
 import re
 from transformers import pipeline
+from langchain_core.documents import Document
 
-def preprocess_text(text: str) -> str:
+def preprocess_text(text) -> str:
     """Предварительная обработка текста"""
+
+    if isinstance(text, Document):
+        text = text.page_content
+
     if not isinstance(text, str):
         raise TypeError(f"Expected string, got {type(text)}: {text}")
-    
-    # Сшивка переносов слов
+
     text = re.sub(r"(\w+)-\n(\w+)", r"\1\2", text)
     text = re.sub(r"\s+", " ", text)
     text = re.sub(r"Adobe PDF Library|Layout by [A-Z\.]+", "", text)
     return text.strip()
+
 
 
 def extract_entities(text: str) -> list:
