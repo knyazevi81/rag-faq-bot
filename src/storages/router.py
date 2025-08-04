@@ -12,7 +12,7 @@ import os
 from src.storage import qd_client
 from src.embedding import embedding_model
 from src.config import settings
-
+from src.utils import preprocess_text, extract_entities
 
 router = APIRouter(
     prefix="/storages",
@@ -60,32 +60,48 @@ async def upload_document(file: UploadFile = File(...)):
         else:
             loader = TextLoader(str(tmp_path))
 
-        documents = loader.load()
+        pages = loader.load()
         
         text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1000,  # Увеличиваем для сохранения контекста
+            chunk_size=1200,
             chunk_overlap=200,
             separators=["\n\n", "\n", "\. ", "! ", "? ", " ", ""],
             length_function=len,
             is_separator_regex=False,
         )
 
-        chunks = text_splitter.split_documents(documents)
 
-        for chunk in chunks:
-            chunk.metadata.update({
-                "filename": file.filename,
-                "uploaded_at": datetime.utcnow().isoformat(),
-                "source": f"/docs/{file.filename}"
-            })
+        documents = []
+        for page in pages:
+            clean_text = preprocess_text(page)
+            page.page_content = clean_text
 
+            entities = extract_entities(clean_text)
+
+            page.metadata["key_entities"] = entities
+            page.metadata["source_file"] = file.filename
+
+            chunks = text_splitter.split_documents([page])
+            documents.extend(chunks)
+        
         vectorstore = Qdrant(
             client=qd_client,
             collection_name=settings.QDRANT_COLLECTION_NAME,
             embeddings=embedding_model
         )
+            
         vectorstore.add_documents(chunks)
 
+        # chunks = text_splitter.split_documents(documents)
+# 
+        # for chunk in chunks:
+            # chunk.metadata.update({
+                # "filename": file.filename,
+                # "uploaded_at": datetime.utcnow().isoformat(),
+                # "source": f"/docs/{file.filename}"
+            # })
+# 
+# 
         return {"message": "Document uploaded and processed successfully."}
 
     finally:
