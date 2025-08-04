@@ -48,19 +48,16 @@ async def ask_question(request: QuestionRequest):
             "sources": sources
         }
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/debug")
-async def debug(query: str = Query(...)):
-    vectorstore = Qdrant(
-        client=qd_client,
-        collection_name=settings.QDRANT_COLLECTION_NAME,
-        embeddings=embedding_model
-    )
-
-    docs = vectorstore.similarity_search(query, k=15)
-    return {
-        "query": query,
-        "chunks": [doc.page_content for doc in docs]
-    }
+# @router.post("/debug")
+# async def debug(query: QuestionRequest = Query(...)):
+#     qa_chain = get_qa_chain()
+#     result = qa_chain({"query": request.question})
+    
+#     return {
+#         "query": query,
+#         "chunks": [doc.page_content for doc in docs]
+#     }
