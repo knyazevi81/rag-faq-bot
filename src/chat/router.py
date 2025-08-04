@@ -30,22 +30,18 @@ class QuestionRequest(BaseModel):
 async def ask_question(request: QuestionRequest):
     try:
         qa_chain = get_qa_chain()
-        result = qa_chain({"query": request.question})
+        result = qa_chain.invoke({"query": request.question})
         
         # Формирование ответа с источниками
-        answer = result["result"]
-        sources = []
-        for doc in result.get("source_documents", []):
-            source_info = {
-                "source": doc.metadata.get("source_file", "unknown"),
-                "page": doc.metadata.get("page", "N/A"),
-                "entities": doc.metadata.get("key_entities", [])
-            }
-            sources.append(source_info)
-        
         return {
-            "answer": answer,
-            "sources": sources
+            "answer": result["result"],
+            "sources": [
+                {
+                    "source": doc.metadata.get("source_file", "unknown"),
+                    "page": doc.metadata.get("page", "N/A"),
+                }
+                for doc in result["source_documents"]
+            ]
         }
     except Exception as e:
         print(e)
