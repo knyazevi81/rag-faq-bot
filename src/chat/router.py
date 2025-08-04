@@ -31,7 +31,7 @@ async def ask_question(request: QuestionRequest):
     try:
         qa_chain = get_qa_chain()
         result = qa_chain.invoke({"query": request.question})
-        data = result["result"].split("<think>")
+        data = result["result"].split("</think>")
 
         # Формирование ответа с источниками
         return {
