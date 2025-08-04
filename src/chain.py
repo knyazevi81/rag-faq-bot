@@ -38,14 +38,13 @@ def get_qa_chain():
         model=settings.AI_MODEL
     )
     embeddings = OllamaEmbeddings(
-        base_url=settings.AI_MODEL,
+        base_url=settings.OLLAMA_BASE_URL,
         model=settings.EMBEDDING_MODEL
     )
 
     # Qdrant клиент
     qd_client = QdrantClient(
         url=settings.QDRANT_URL,
-        api_key=settings.QDRANT_API_KEY or None
     )
 
     # Векторное хранилище
