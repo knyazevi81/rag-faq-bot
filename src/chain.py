@@ -39,7 +39,6 @@ def get_qa_chain():
         client=None,  # in-memory
         collection_name="insurance_base",
         embeddings=embeddings,
-        location=":memory:",
         content_payload_key="page_content",
         metadata_payload_key="metadata",
     )
