@@ -31,10 +31,13 @@ async def ask_question(request: QuestionRequest):
     try:
         qa_chain = get_qa_chain()
         result = qa_chain.invoke({"query": request.question})
-        
+        data = result["result"].split("<think>")
+
         # Формирование ответа с источниками
         return {
-            "answer": result["result"],
+
+            "answer": data[1],
+            "think": data[0],
             "sources": [
                 {
                     "source": doc.metadata.get("source_file", "unknown"),
