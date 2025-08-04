@@ -3,13 +3,15 @@ from transformers import pipeline
 
 def preprocess_text(text: str) -> str:
     """Предварительная обработка текста"""
+    if not isinstance(text, str):
+        raise TypeError(f"Expected string, got {type(text)}: {text}")
+    
     # Сшивка переносов слов
     text = re.sub(r"(\w+)-\n(\w+)", r"\1\2", text)
-    # Удаление лишних пробелов
     text = re.sub(r"\s+", " ", text)
-    # Удаление специфичных артефактов PDF
     text = re.sub(r"Adobe PDF Library|Layout by [A-Z\.]+", "", text)
     return text.strip()
+
 
 def extract_entities(text: str) -> list:
     """Извлечение именованных сущностей из текста"""
