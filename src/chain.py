@@ -34,7 +34,7 @@ def rerank_results(query: str, documents: list):
 def get_qa_chain():
     # LLM и эмбеддинги
     llm = Ollama(
-        base_url=settings.AI_MODEL,
+        base_url=settings.OLLAMA_BASE_URL,
         model=settings.AI_MODEL
     )
     embeddings = OllamaEmbeddings(
