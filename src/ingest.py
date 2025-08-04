@@ -29,7 +29,10 @@ def extract_entities(text: str):
 
 def ingest_documents():
     # Инициализация эмбеддингов
-    embeddings = OllamaEmbeddings(model="nomic-embed-text")
+    embeddings = OllamaEmbeddings(
+        base_url=settings.OLLAMA_BASE_URL,
+        model=settings.EMBEDDING_MODEL
+    )
     
     # Адаптивный чанкинг с увеличенным размером и перекрытием
     text_splitter = RecursiveCharacterTextSplitter(
