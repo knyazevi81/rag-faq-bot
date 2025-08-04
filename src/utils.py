@@ -1,6 +1,7 @@
 import re
 from transformers import pipeline
 from langchain_core.documents import Document
+from transformers import AutoTokenizer, AutoModelForTokenClassification, pipeline
 
 def preprocess_text(text) -> str:
     """Предварительная обработка текста"""
@@ -18,12 +19,18 @@ def preprocess_text(text) -> str:
 
 
 
+
 def extract_entities(text: str) -> list:
-    """Извлечение именованных сущностей из текста"""
+    """Извлечение именованных сущностей из текста (локально)"""
     try:
-        ner = pipeline("ner", model="Davlan/bert-base-multilingual-cased-ner")
+        model_path = "/bert-base-multilingual-cased-ner-hrl"  # Укажи путь к папке с моделью
+
+        tokenizer = AutoTokenizer.from_pretrained(model_path)
+        model = AutoModelForTokenClassification.from_pretrained(model_path)
+
+        ner = pipeline("ner", model=model, tokenizer=tokenizer)
+
         entities = ner(text)
-        # Собираем только сущности с высокой уверенностью
         return list(set([e['word'] for e in entities if e['score'] > 0.8]))
     except Exception as e:
         print(f"Entity extraction error: {e}")
