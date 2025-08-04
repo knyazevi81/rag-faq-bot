@@ -33,8 +33,14 @@ def rerank_results(query: str, documents: list):
 
 def get_qa_chain():
     # LLM и эмбеддинги
-    llm = Ollama(model=settings.AI_MODEL)
-    embeddings = OllamaEmbeddings(model=settings.EMBEDDING_MODEL)
+    llm = Ollama(
+        base_url=settings.AI_MODEL,
+        model=settings.AI_MODEL
+    )
+    embeddings = OllamaEmbeddings(
+        base_url=settings.AI_MODEL,
+        model=settings.EMBEDDING_MODEL
+    )
 
     # Qdrant клиент
     qd_client = QdrantClient(
