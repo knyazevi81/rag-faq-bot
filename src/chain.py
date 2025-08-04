@@ -6,6 +6,10 @@ from langchain.prompts import PromptTemplate
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 import torch
 
+from src.config import settings
+from src.storage import qd_client
+
+
 # Функция для реранжирования результатов
 def rerank_results(query: str, documents: list):
     try:
@@ -31,12 +35,12 @@ def rerank_results(query: str, documents: list):
 
 def get_qa_chain():
     # Инициализация моделей
-    embeddings = OllamaEmbeddings(model="nomic-embed-text")
-    llm = Ollama(model="openhermes:7b")
+    embeddings = OllamaEmbeddings(model=settings.EMBEDDING_MODEL)
+    llm = Ollama(model=settings.AI_MODEL)
     
     # Подключаемся к Qdrant
     vector_store = Qdrant(
-        client=None,  # in-memory
+        client=qd_client,
         collection_name="insurance_base",
         embeddings=embeddings,
         content_payload_key="page_content",
