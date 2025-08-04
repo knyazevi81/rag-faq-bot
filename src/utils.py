@@ -18,8 +18,6 @@ def preprocess_text(text) -> str:
     return text.strip()
 
 
-
-
 def extract_entities(text: str) -> list:
     """Извлечение именованных сущностей из текста (локально)"""
     try:
